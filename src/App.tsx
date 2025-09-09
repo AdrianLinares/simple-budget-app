@@ -1,40 +1,26 @@
 import React, { useState } from 'react';
 import CategoryCard from './components/CategoryCard';
 import BudgetSummary from './components/BudgetSummary';
-import { BudgetState, Expense } from './types/budget';
+import DataManager from './components/DataManager';
+import { Expense } from './types/budget';
+import { useBudgetPersistence } from './hooks/useBudgetPersistence';
 
 function App() {
-  const [budget, setBudget] = useState<BudgetState>({
-    monthlyIncome: 0,
-    categories: {
-      needs: {
-        name: 'Necesidades',
-        percentage: 50,
-        expenses: [],
-        color: '#10B981',
-        icon: 'home'
-      },
-      wants: {
-        name: 'Gustos',
-        percentage: 30,
-        expenses: [],
-        color: '#3B82F6',
-        icon: 'shopping-bag'
-      },
-      savings: {
-        name: 'Ahorros',
-        percentage: 20,
-        expenses: [],
-        color: '#F59E0B',
-        icon: 'piggy-bank'
-      }
-    }
-  });
+  const { 
+    budget, 
+    updateBudget, 
+    clearBudget, 
+    exportData, 
+    importData, 
+    isLoading 
+  } = useBudgetPersistence();
+  
+  const [showDataManager, setShowDataManager] = useState(false);
 
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   const handleIncomeChange = (income: number) => {
-    setBudget(prev => ({
+    updateBudget(prev => ({
       ...prev,
       monthlyIncome: income
     }));
@@ -49,7 +35,7 @@ function App() {
       isPaid: false
     };
 
-    setBudget(prev => ({
+    updateBudget(prev => ({
       ...prev,
       categories: {
         ...prev.categories,
@@ -62,7 +48,7 @@ function App() {
   };
 
   const toggleExpense = (categoryKey: keyof typeof budget.categories, expenseId: string) => {
-    setBudget(prev => ({
+    updateBudget(prev => ({
       ...prev,
       categories: {
         ...prev.categories,
@@ -79,7 +65,7 @@ function App() {
   };
 
   const togglePayment = (categoryKey: keyof typeof budget.categories, expenseId: string) => {
-    setBudget(prev => ({
+    updateBudget(prev => ({
       ...prev,
       categories: {
         ...prev.categories,
@@ -96,7 +82,7 @@ function App() {
   };
 
   const deleteExpense = (categoryKey: keyof typeof budget.categories, expenseId: string) => {
-    setBudget(prev => ({
+    updateBudget(prev => ({
       ...prev,
       categories: {
         ...prev.categories,
@@ -111,7 +97,7 @@ function App() {
   };
 
   const reorderExpenses = (categoryKey: keyof typeof budget.categories, reorderedExpenses: Expense[]) => {
-    setBudget(prev => ({
+    updateBudget(prev => ({
       ...prev,
       categories: {
         ...prev.categories,
@@ -122,6 +108,20 @@ function App() {
       }
     }));
   };
+
+  // Mostrar loading si está cargando
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <span className="text-2xl">💰</span>
+          </div>
+          <p className="text-lg text-gray-600">Cargando tu presupuesto...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -134,9 +134,18 @@ function App() {
             </div>
             <h1 className="text-4xl font-bold text-gray-900">Presupuesto 50/30/20</h1>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-4">
             Gestiona tus finanzas personales siguiendo la regla del 50% necesidades, 30% gustos y 20% ahorros
           </p>
+          
+          {/* Data Management Button */}
+          <button
+            onClick={() => setShowDataManager(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <span>⚙️</span>
+            Gestionar Datos
+          </button>
         </div>
 
         {/* Income Input */}
@@ -203,6 +212,16 @@ function App() {
               Una vez que ingreses tu ingreso, podrás comenzar a planificar tu presupuesto
             </p>
           </div>
+        )}
+
+        {/* Data Manager Modal */}
+        {showDataManager && (
+          <DataManager
+            onClose={() => setShowDataManager(false)}
+            onClearData={clearBudget}
+            onExportData={exportData}
+            onImportData={importData}
+          />
         )}
       </div>
     </div>
