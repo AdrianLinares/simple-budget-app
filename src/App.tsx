@@ -47,23 +47,6 @@ function App() {
     }));
   };
 
-  const editExpense = (categoryKey: keyof typeof budget.categories, expenseId: string, description: string, amount: number) => {
-    updateBudget(prev => ({
-      ...prev,
-      categories: {
-        ...prev.categories,
-        [categoryKey]: {
-          ...prev.categories[categoryKey],
-          expenses: prev.categories[categoryKey].expenses.map(expense =>
-            expense.id === expenseId
-              ? { ...expense, description, amount }
-              : expense
-          )
-        }
-      }
-    }));
-  };
-
   const toggleExpense = (categoryKey: keyof typeof budget.categories, expenseId: string) => {
     updateBudget(prev => ({
       ...prev,
