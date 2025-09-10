@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Expense } from '../types/budget';
@@ -8,6 +8,7 @@ interface ExpenseItemProps {
   onToggleExpense: (id: string) => void;
   onTogglePayment: (id: string) => void;
   onDeleteExpense: (id: string) => void;
+  onEditExpense: (id: string, description: string, amount: number) => void;
 }
 
 const ExpenseItem: React.FC<ExpenseItemProps> = ({
@@ -15,7 +16,12 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
   onToggleExpense,
   onTogglePayment,
   onDeleteExpense,
+  onEditExpense,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDescription, setEditDescription] = useState(expense.description);
+  const [editAmount, setEditAmount] = useState(expense.amount.toString());
+
   const {
     attributes,
     listeners,
@@ -30,6 +36,63 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editDescription.trim() && editAmount && parseFloat(editAmount) > 0) {
+      onEditExpense(expense.id, editDescription.trim(), parseFloat(editAmount));
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditDescription(expense.description);
+    setEditAmount(expense.amount.toString());
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
+        <form onSubmit={handleEditSubmit} className="space-y-3">
+          <input
+            type="text"
+            placeholder="Descripción del gasto"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
+            autoFocus
+          />
+          <input
+            type="number"
+            placeholder="Valor ($)"
+            value={editAmount}
+            onChange={(e) => setEditAmount(e.target.value)}
+            step="0.01"
+            min="0.01"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required
+          />
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Guardar
+            </button>
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -89,8 +152,16 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
         ${expense.amount.toLocaleString()}
       </span>
       <button
+        onClick={() => setIsEditing(true)}
+        className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+        title="Editar gasto"
+      >
+        <span className="text-sm">✏️</span>
+      </button>
+      <button
         onClick={() => onDeleteExpense(expense.id)}
         className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+        title="Eliminar gasto"
       >
         <span className="text-sm">🗑️</span>
       </button>

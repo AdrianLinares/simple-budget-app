@@ -96,6 +96,23 @@ function App() {
     }));
   };
 
+  const editExpense = (categoryKey: keyof typeof budget.categories, expenseId: string, description: string, amount: number) => {
+    updateBudget(prev => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [categoryKey]: {
+          ...prev.categories[categoryKey],
+          expenses: prev.categories[categoryKey].expenses.map(expense =>
+            expense.id === expenseId
+              ? { ...expense, description, amount }
+              : expense
+          )
+        }
+      }
+    }));
+  };
+
   const reorderExpenses = (categoryKey: keyof typeof budget.categories, reorderedExpenses: Expense[]) => {
     updateBudget(prev => ({
       ...prev,
@@ -193,6 +210,7 @@ function App() {
                     onToggleExpense={(id) => toggleExpense(categoryKey, id)}
                     onTogglePayment={(id) => togglePayment(categoryKey, id)}
                     onDeleteExpense={(id) => deleteExpense(categoryKey, id)}
+                    onEditExpense={(id, description, amount) => editExpense(categoryKey, id, description, amount)}
                   />
                 );
               })}
