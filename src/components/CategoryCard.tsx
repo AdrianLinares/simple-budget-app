@@ -92,7 +92,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   const getIcon = (categoryName: string) => {
     switch (categoryName) {
       case 'Necesidades': return '🏠';
-      case 'Opcionales': return '🛍️';
+      case 'Deudas/Otros gastos': return '💳';
       case 'Ahorros': return '💰';
       default: return '💵';
     }

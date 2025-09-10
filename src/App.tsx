@@ -152,7 +152,7 @@ function App() {
             <h1 className="text-4xl font-bold text-gray-900">Presupuesto 50/30/20</h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-4">
-            Gestiona tus finanzas personales siguiendo la regla del 50% necesidades, 30% gustos y 20% ahorros
+            Gestiona tus finanzas personales siguiendo la regla del 50% Necesidades, 30% Deudas y otros gastos y 20% Ahorros
           </p>
           
           {/* Data Management Button */}

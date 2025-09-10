@@ -15,7 +15,7 @@ const getInitialBudgetState = (): BudgetState => ({
       icon: 'home'
     },
     wants: {
-      name: 'Gustos',
+      name: 'Deudas/Otros gastos',
       percentage: 30,
       expenses: [],
       color: '#3B82F6',
