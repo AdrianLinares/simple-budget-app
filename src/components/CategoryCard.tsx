@@ -29,6 +29,7 @@ interface CategoryCardProps {
   onToggleExpense: (id: string) => void;
   onTogglePayment: (id: string) => void;
   onDeleteExpense: (id: string) => void;
+  onEditExpense: (id: string, description: string, amount: number) => void;
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
@@ -39,6 +40,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   onToggleExpense,
   onTogglePayment,
   onDeleteExpense,
+  onEditExpense,
 }) => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -229,6 +231,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                   onToggleExpense={onToggleExpense}
                   onTogglePayment={onTogglePayment}
                   onDeleteExpense={onDeleteExpense}
+                  onEditExpense={onEditExpense}
                 />
               ))}
             </div>
