@@ -37,10 +37,12 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editDescription.trim() && editAmount && parseFloat(editAmount) > 0) {
-      onEditExpense(expense.id, editDescription.trim(), parseFloat(editAmount));
+  const handleSaveEdit = () => {
+    const trimmedDescription = editDescription.trim();
+    const newAmount = parseFloat(editAmount);
+
+    if (trimmedDescription && newAmount > 0) {
+      onEditExpense(expense.id, trimmedDescription, newAmount);
       setIsEditing(false);
     }
   };
@@ -51,45 +53,80 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
     setIsEditing(false);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
+
   if (isEditing) {
     return (
-      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-        <form onSubmit={handleEditSubmit} className="space-y-3">
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="flex items-center gap-3 p-3 rounded-lg border bg-blue-50 border-blue-200"
+      >
+        {/* Drag Handle (disabled during edit) */}
+        <div className="p-1 text-gray-300 cursor-not-allowed">
+          <span className="text-sm">⋮⋮</span>
+        </div>
+
+        <input
+          type="checkbox"
+          checked={expense.isActive}
+          onChange={() => onToggleExpense(expense.id)}
+          className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+        />
+        
+        <input
+          type="checkbox"
+          checked={expense.isPaid}
+          onChange={() => onTogglePayment(expense.id)}
+          disabled={!expense.isActive}
+          className="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+          title="Marcar como pagado"
+        />
+
+        <div className="flex-2 flex gap-2">
           <input
             type="text"
-            placeholder="Descripción del gasto"
             value={editDescription}
             onChange={(e) => setEditDescription(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            required
+            onKeyDown={handleKeyPress}
+            className="flex-2 px-1 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Descripción del gasto"
             autoFocus
           />
           <input
             type="number"
-            placeholder="Valor ($)"
             value={editAmount}
             onChange={(e) => setEditAmount(e.target.value)}
+            onKeyDown={handleKeyPress}
             step="0.01"
             min="0.01"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            required
+            className="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Valor"
           />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              Guardar
-            </button>
-            <button
-              type="button"
-              onClick={handleCancelEdit}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
+        </div>
+
+        <div className="flex gap-1">
+          <button
+            onClick={handleSaveEdit}
+            className="p-1 text-green-600 hover:bg-green-100 rounded transition-colors"
+            title="Guardar cambios"
+          >
+            <span className="text-sm">✅</span>
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            className="p-1 text-gray-600 hover:bg-gray-100 rounded transition-colors"
+            title="Cancelar edición"
+          >
+            <span className="text-sm">❌</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -120,6 +157,7 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
         onChange={() => onToggleExpense(expense.id)}
         className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
       />
+      
       <input
         type="checkbox"
         checked={expense.isPaid}
@@ -128,6 +166,7 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
         className="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500 disabled:opacity-50"
         title="Marcar como pagado"
       />
+
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-medium truncate ${
           expense.isActive 
@@ -142,6 +181,7 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
           <p className="text-xs text-green-600">✓ Pagado</p>
         )}
       </div>
+
       <span className={`text-sm font-semibold ${
         expense.isActive 
           ? expense.isPaid 
@@ -151,20 +191,23 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
       }`}>
         ${expense.amount.toLocaleString()}
       </span>
-      <button
-        onClick={() => setIsEditing(true)}
-        className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors"
-        title="Editar gasto"
-      >
-        <span className="text-sm">✏️</span>
-      </button>
-      <button
-        onClick={() => onDeleteExpense(expense.id)}
-        className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-        title="Eliminar gasto"
-      >
-        <span className="text-sm">🗑️</span>
-      </button>
+
+      <div className="flex gap-1">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+          title="Editar gasto"
+        >
+          <span className="text-sm">✏️</span>
+        </button>
+        <button
+          onClick={() => onDeleteExpense(expense.id)}
+          className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+          title="Eliminar gasto"
+        >
+          <span className="text-sm">🗑️</span>
+        </button>
+      </div>
     </div>
   );
 };
