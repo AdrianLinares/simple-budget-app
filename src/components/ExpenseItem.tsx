@@ -98,73 +98,88 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
+      className={`p-3 rounded-lg border transition-all ${
         expense.isActive
           ? 'bg-white border-gray-200'
           : 'bg-gray-50 border-gray-100 opacity-60'
       } ${isDragging ? 'shadow-lg z-10' : ''}`}
     >
-      {/* Drag Handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-600 transition-colors"
-        title="Arrastrar para reordenar"
-      >
-        <span className="text-sm">⋮⋮</span>
+      {/* Top row with checkboxes, drag handle and description */}
+      <div className="flex items-start gap-3 mb-2">
+        {/* Drag Handle */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 mt-0.5"
+          title="Arrastrar para reordenar"
+        >
+          <span className="text-sm">⋮⋮</span>
+        </div>
+
+        {/* Checkboxes */}
+        <div className="flex flex-col gap-1 flex-shrink-0">
+          <input
+            type="checkbox"
+            checked={expense.isActive}
+            onChange={() => onToggleExpense(expense.id)}
+            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="checkbox"
+            checked={expense.isPaid}
+            onChange={() => onTogglePayment(expense.id)}
+            disabled={!expense.isActive}
+            className="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+            title="Marcar como pagado"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-medium break-words ${
+            expense.isActive 
+              ? expense.isPaid 
+                ? 'text-green-700 line-through' 
+                : 'text-gray-900'
+              : 'text-gray-500'
+          }`}>
+            {expense.description}
+          </p>
+          {expense.isPaid && expense.isActive && (
+            <p className="text-xs text-green-600 mt-1">✓ Pagado</p>
+          )}
+        </div>
       </div>
 
-      <input
-        type="checkbox"
-        checked={expense.isActive}
-        onChange={() => onToggleExpense(expense.id)}
-        className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-      />
-      <input
-        type="checkbox"
-        checked={expense.isPaid}
-        onChange={() => onTogglePayment(expense.id)}
-        disabled={!expense.isActive}
-        className="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500 disabled:opacity-50"
-        title="Marcar como pagado"
-      />
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${
+      {/* Bottom row with amount and action buttons */}
+      <div className="flex items-center justify-between gap-3 pl-12">
+        <span className={`text-sm font-semibold ${
           expense.isActive 
             ? expense.isPaid 
               ? 'text-green-700 line-through' 
               : 'text-gray-900'
             : 'text-gray-500'
         }`}>
-          {expense.description}
-        </p>
-        {expense.isPaid && expense.isActive && (
-          <p className="text-xs text-green-600">✓ Pagado</p>
-        )}
+          ${expense.amount.toLocaleString()}
+        </span>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsEditing(true)}
+            className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+            title="Editar gasto"
+          >
+            <span className="text-sm">✏️</span>
+          </button>
+          <button
+            onClick={() => onDeleteExpense(expense.id)}
+            className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+            title="Eliminar gasto"
+          >
+            <span className="text-sm">🗑️</span>
+          </button>
+        </div>
       </div>
-      <span className={`text-sm font-semibold ${
-        expense.isActive 
-          ? expense.isPaid 
-            ? 'text-green-700 line-through' 
-            : 'text-gray-900'
-          : 'text-gray-500'
-      }`}>
-        ${expense.amount.toLocaleString()}
-      </span>
-      <button
-        onClick={() => setIsEditing(true)}
-        className="p-1 text-blue-500 hover:bg-blue-50 rounded transition-colors"
-        title="Editar gasto"
-      >
-        <span className="text-sm">✏️</span>
-      </button>
-      <button
-        onClick={() => onDeleteExpense(expense.id)}
-        className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-        title="Eliminar gasto"
-      >
-        <span className="text-sm">🗑️</span>
-      </button>
     </div>
   );
 };
